@@ -1,0 +1,198 @@
+> #randomForest is used to build the ensemble forest and fscaret is used for other data processing methods like splitting the training data set
+> library("randomForest")
+> library(pROC)
+randomForest 4.6-12
+Type rfNews() to see new features/changes/bug fixes.
+> library("fscaret")
+Loading required package: caret
+Loading required package: lattice
+Loading required package: ggplot2
+Loading required package: gsubfn
+Loading required package: proto
+Loading required package: hmeasure
+Loading required package: parallel
+
+Attaching package: ‘fscaret’
+
+The following object is masked from ‘package:caret’:
+
+    RMSE
+
+> 
+> 
+> #Setting the working directory
+> setwd("E:/Datasets/Ford")
+> 
+> print("*****Starting variable preparation phase*****")
+[1] "*****Starting variable preparation phase*****"
+> myTrain <- read.csv("fordTrain.csv")
+> fTest <- read.csv("fordTest.csv")
+> solution <- read.csv("Solution.csv")
+> partition <- createDataPartition(myTrain$IsAlert, p=0.20, list=FALSE)
+> myTrain <- data.frame(myTrain[partition,])
+> 
+> 
+> print("*****Starting Model Generation Phase*****")
+[1] "*****Starting Model Generation Phase*****"
+> myRF <- randomForest(IsAlert ~., data = myTrain, do.trace = TRUE, importance=TRUE, method="class", ntree=100, forest=TRUE) -->User Note: Following is the log from individual trees generated
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+   1 |  0.05025    20.65 |
+   2 |  0.04667    19.18 |
+   3 |   0.0429    17.63 |
+   4 |   0.0403    16.56 |
+   5 |  0.03787    15.56 |
+   6 |  0.03581    14.71 |
+   7 |  0.03397    13.96 |
+   8 |  0.03204    13.16 |
+   9 |  0.03074    12.63 |
+  10 |  0.02969    12.20 |
+  11 |  0.02863    11.76 |
+  12 |  0.02777    11.41 |
+  13 |  0.02706    11.12 |
+  14 |  0.02644    10.87 |
+  15 |  0.02597    10.67 |
+  16 |  0.02561    10.52 |
+  17 |  0.02514    10.33 |
+  18 |  0.02477    10.18 |
+  19 |  0.02445    10.05 |
+  20 |  0.02424     9.96 |
+  21 |  0.02396     9.85 |
+  22 |  0.02369     9.74 |
+  23 |  0.02346     9.64 |
+  24 |  0.02328     9.57 |
+  25 |   0.0231     9.49 |
+  26 |  0.02295     9.43 |
+  27 |   0.0228     9.37 |
+  28 |  0.02267     9.32 |
+  29 |  0.02256     9.27 |
+  30 |  0.02248     9.24 |
+  31 |  0.02238     9.19 |
+  32 |  0.02224     9.14 |
+  33 |  0.02215     9.10 |
+  34 |   0.0221     9.08 |
+  35 |  0.02204     9.06 |
+  36 |  0.02198     9.03 |
+  37 |  0.02192     9.01 |
+  38 |  0.02186     8.98 |
+  39 |  0.02181     8.96 |
+  40 |  0.02176     8.94 |
+  41 |  0.02169     8.91 |
+  42 |  0.02165     8.90 |
+  43 |  0.02162     8.88 |
+  44 |  0.02155     8.85 |
+  45 |  0.02149     8.83 |
+  46 |  0.02145     8.81 |
+  47 |  0.02139     8.79 |
+  48 |  0.02137     8.78 |
+  49 |  0.02134     8.77 |
+  50 |   0.0213     8.75 |
+  51 |  0.02126     8.74 |
+  52 |  0.02122     8.72 |
+  53 |  0.02117     8.70 |
+  54 |  0.02115     8.69 |
+  55 |  0.02112     8.68 |
+  56 |   0.0211     8.67 |
+  57 |  0.02108     8.66 |
+  58 |  0.02105     8.65 |
+  59 |  0.02103     8.64 |
+  60 |  0.02102     8.64 |
+  61 |  0.02099     8.62 |
+  62 |  0.02095     8.61 |
+  63 |  0.02093     8.60 |
+  64 |  0.02092     8.60 |
+  65 |   0.0209     8.59 |
+  66 |  0.02089     8.59 |
+  67 |  0.02089     8.58 |
+  68 |  0.02085     8.57 |
+  69 |  0.02082     8.56 |
+  70 |   0.0208     8.55 |
+  71 |   0.0208     8.55 |
+  72 |  0.02078     8.54 |
+  73 |  0.02076     8.53 |
+  74 |  0.02075     8.53 |
+  75 |  0.02074     8.52 |
+  76 |  0.02072     8.51 |
+  77 |  0.02072     8.51 |
+  78 |  0.02072     8.51 |
+  79 |  0.02071     8.51 |
+  80 |  0.02068     8.50 |
+  81 |  0.02066     8.49 |
+  82 |  0.02064     8.48 |
+  83 |  0.02063     8.48 |
+  84 |  0.02063     8.48 |
+  85 |  0.02062     8.47 |
+  86 |  0.02062     8.47 |
+  87 |  0.02059     8.46 |
+  88 |  0.02057     8.45 |
+  89 |  0.02056     8.45 |
+  90 |  0.02055     8.45 |
+  91 |  0.02054     8.44 |
+  92 |  0.02053     8.44 |
+  93 |  0.02053     8.43 |
+  94 |  0.02051     8.43 |
+  95 |  0.02049     8.42 |
+  96 |  0.02048     8.41 |
+  97 |  0.02046     8.41 |
+  98 |  0.02045     8.40 |
+  99 |  0.02044     8.40 |
+ 100 |  0.02043     8.39 |
+Warning message:
+In randomForest.default(m, y, ...) :
+  The response has five or fewer unique values.  Are you sure you want to do regression?
+> plot(myRF, uniform=TRUE, main = "MY RANDOM FOREST")
+Warning messages:
+1: In plot.window(...) : "uniform" is not a graphical parameter
+2: In plot.xy(xy, type, ...) : "uniform" is not a graphical parameter
+3: In axis(side = side, at = at, labels = labels, ...) :
+  "uniform" is not a graphical parameter
+4: In axis(side = side, at = at, labels = labels, ...) :
+  "uniform" is not a graphical parameter
+5: In box(...) : "uniform" is not a graphical parameter
+6: In title(...) : "uniform" is not a graphical parameter
+> 
+> print("*****Predicting Values*****")
+[1] "*****Predicting Values*****"
+There were 12 warnings (use warnings() to see them)
+> myPrediction <- predict(myRF, newdata = fTest, type= 'class')
+> 
+> predictionMetric <- data.frame(myPrediction)
+> 
+> randomForestResult <- data.frame(actual=solution$Prediction, calculated=round(myPrediction))
+> 
+> target <- round((predictionMetric$myPrediction))
+> fTest$IsAlert <- as.numeric(as.character(fTest$IsAlert))
+> result <- mean((fTest$IsAlert-target)^2)
+> print("*****The root mean squared Error is*****")
+[1] "*****The root mean squared Error is*****"
+> sqrt(result)
+[1] 0.9314559
+> table(randomForestResult$actual, randomForestResult$calculated)  User Note --> Confusion matrix has been generated to show the accuracy and cost
+   
+        0     1
+  0 15689 14225
+  1   308 90618
+
+> print("***Plotting results***")
+[1] "***Plotting results***"
+> randomForestPlot <- roc(randomForestResult$actual, randomForestResult$calculated, ci=TRUE, of="thresholds", thresholds=0.9)
+> randomForestPlot
+
+Call:
+roc.default(response = randomForestResult$actual, predictor = randomForestResult$calculated,     ci = TRUE, of = "thresholds", thresholds = 0.9) --> User Note: AUC
+
+Data: randomForestResult$calculated in 29914 controls (randomForestResult$actual 0) < 90926 cases (randomForestResult$actual 1).
+Area under the curve: 0.7605
+95% CI (2000 stratified bootstrap replicates):
+ thresholds sp.low sp.median sp.high se.low se.median se.high
+        0.9 0.5189    0.5246  0.5299 0.9962    0.9966   0.997
+> plot(randomForestPlot)
+
+Call:
+roc.default(response = randomForestResult$actual, predictor = randomForestResult$calculated,     ci = TRUE, of = "thresholds", thresholds = 0.9)
+
+Data: randomForestResult$calculated in 29914 controls (randomForestResult$actual 0) < 90926 cases (randomForestResult$actual 1).
+Area under the curve: 0.7605
+95% CI (2000 stratified bootstrap replicates):
+ thresholds sp.low sp.median sp.high se.low se.median se.high
+        0.9 0.5189    0.5246  0.5299 0.9962    0.9966   0.997

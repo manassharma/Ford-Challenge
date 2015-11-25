@@ -1,0 +1,96 @@
+> #fscaret is used for data processing methods like splitting the training data set
+> library("fscaret")
+> library(pROC)
+> 
+> #Setting the working directory
+> setwd("E:/Datasets/Ford")
+> 
+> print("*****Starting variable preparation phase*****")
+[1] "*****Starting variable preparation phase*****"
+> myTrain <- read.csv("fordTrain.csv")
+> glmTest <- read.csv("fordTest.csv")
+> solution <- read.csv("Solution.csv")
+> 
+> print("*****Starting Model Generation Phase*****")
+[1] "*****Starting Model Generation Phase*****"
+> svp <- glm(IsAlert ~., data=myTrain, family = binomial)
+Warning message:
+glm.fit: fitted probabilities numerically 0 or 1 occurred 
+> 
+> #plot(svp, uniform=TRUE, main = "GLM Plot")
+> 
+> print("*****Predicting Values*****")
+[1] "*****Predicting Values*****"
+> pred <- predict(svp, newdata = glmTest, type="response")
+Warning message:
+In predict.lm(object, newdata, se.fit, scale = 1, type = ifelse(type ==  :
+  prediction from a rank-deficient fit may be misleading
+> 
+> count <-0
+> for(i in 1: nrow(glmTest)){
++   if(pred[[i]] > 0.5){
++     pred[[i]] = 1
++   }
++   else{
++     pred[[i]] = 0
++   }
++ }
+> 
+> glmResult <- data.frame(actual=solution$Prediction, calculated=pred)  User Note --> Changing probabilities to numerals
+> 
+> count <-0
+> for(i in 1: nrow(glmTest)){
++   if(pred[[i]] > 0.5){
++     pred[[i]] = 1
++   }
++   else{
++     pred[[i]] = 0
++   }
++ }
+> 
+> 
+> errorCount <-0
+> for(i in 1: nrow(glmTest)){
++   if(pred[[i]] != solution$Prediction[i]){
++     errorCount = errorCount+1
++   }
++ }
+> 
+> error <- errorCount/nrow(glmTest)
+> print("Net error is")
+[1] "Net error is"
+> print(error)  User Note --> Net error
+[1] 0.1332009
+> 
+> 
+> print("***Confusion Matrix is as Follows***")
+[1] "***Confusion Matrix is as Follows***"
+> table(glmResult$actual, glmResult$calculated)  User Note --> Confusion Matrix for accuracy and cost
+   
+        0     1
+  0 13858 16056
+  1    40 90886
+> 
+> print("***Plotting Results***")
+[1] "***Plotting Results***"
+> glmPlot <- roc(glmResult$actual, glmResult$calculated, ci=TRUE, of="thresholds", thresholds=0.9)
+> glmPlot
+
+Call:
+roc.default(response = glmResult$actual, predictor = glmResult$calculated,     ci = TRUE, of = "thresholds", thresholds = 0.9)
+
+Data: glmResult$calculated in 29914 controls (glmResult$actual 0) < 90926 cases (glmResult$actual 1).
+Area under the curve: 0.7314
+95% CI (2000 stratified bootstrap replicates):
+ thresholds sp.low sp.median sp.high se.low se.median se.high
+        0.9 0.4575    0.4632  0.4687 0.9994    0.9996  0.9997
+> plot(glmPlot)
+
+Call:
+roc.default(response = glmResult$actual, predictor = glmResult$calculated,     ci = TRUE, of = "thresholds", thresholds = 0.9)  User Note --> AUC computation
+
+Data: glmResult$calculated in 29914 controls (glmResult$actual 0) < 90926 cases (glmResult$actual 1).
+Area under the curve: 0.7314
+95% CI (2000 stratified bootstrap replicates):
+ thresholds sp.low sp.median sp.high se.low se.median se.high
+        0.9 0.4575    0.4632  0.4687 0.9994    0.9996  0.9997

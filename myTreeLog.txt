@@ -1,0 +1,85 @@
+> #rpart is used to build the classification tree and fscaret is used for other data processing methods like splitting the training data set
+> library(rpart)
+> library("fscaret")
+> library(pROC)
+> 
+> #Setting the working directory
+> setwd("E:/Datasets/Ford")
+> 
+> print("*****Starting variable preparation phase*****")
+[1] "*****Starting variable preparation phase*****"
+> myTrain <- read.csv("fordTrain.csv")
+> myTrain <- data.frame(myTrain)
+> rpartTest <- read.csv("fordTest.csv")
+> rpartTest <- data.frame(rpartTest)
+> eval <- read.csv("Solution.csv")
+> eval <- data.frame(eval)
+> 
+> 
+> #Setting the target variable to all 0s(clearing)
+> rpartTest$IsAlert <- 0
+> 
+> print("*****Starting Model Generation Phase*****")
+[1] "*****Starting Model Generation Phase*****"
+> fit <- rpart(IsAlert ~ V11 + E9 + E5, method = "class", data = myTrain)
+> 
+> plot(fit,uniform= TRUE,main= "Classification Tree for Ford Challenge")
+> text(fit,use.n=TRUE, all=TRUE, cex=.8)
+> post(fit, title = "Classification Tree for Ford Challenge")
+> pfit <- prune(fit,cp= fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
+> 
+> #Plotting the prunned classification tree
+> plot(pfit,uniform=TRUE,main = 'Pruned Classification Tree For Ford Challenge')
+> text(pfit,use.n=TRUE, all= TRUE, cex=.8)
+> 
+> print("*****Predicting Values*****")
+[1] "*****Predicting Values*****"
+> myPrediction <- predict(pfit, newdata = rpartTest, type= 'class')
+> predictionMetric <- data.frame(myPrediction)
+> 
+> originalCase <- sum(eval$Indicator == 0)
+> outputCase <- sum(predictionMetric$IsAlert == 0)
+> 
+> ########Evaluation of Result###################
+> 
+> target <- as.numeric(as.character(predictionMetric$myPrediction))
+> result <- mean((eval$Prediction-target)^2)
+> 
+> print("*****The root mean squared Error is*****")
+[1] "*****The root mean squared Error is*****"
+> print(result)  User Note --> RMSE
+[1] 0.2245118
+> 
+> treeResult <- data.frame(actual = eval$Prediction, calculated = as.numeric(as.character(predictionMetric$myPrediction)))
+> 
+> print("***Confusion Matrix is as Follows***")
+[1] "***Confusion Matrix is as Follows***"
+> table(treeResult$actual, treeResult$calculated)  User Note --> Confusion Matrix for accuracy and cost computation
+   
+        0     1
+  0 18233 11681
+  1 15449 75477
+> 
+> print("***Plotting ROC for the classification tree***")
+[1] "***Plotting ROC for the classification tree***"
+> rpartPlot <- roc(treeResult$actual, treeResult$calculated, ci=TRUE, of="thresholds", thresholds=0.9)
+> rpartPlot
+
+Call:
+roc.default(response = treeResult$actual, predictor = treeResult$calculated,     ci = TRUE, of = "thresholds", thresholds = 0.9)
+
+Data: treeResult$calculated in 29914 controls (treeResult$actual 0) < 90926 cases (treeResult$actual 1).
+Area under the curve: 0.7198
+95% CI (2000 stratified bootstrap replicates):
+ thresholds sp.low sp.median sp.high se.low se.median se.high
+        0.9 0.6037    0.6095  0.6152 0.8275    0.8301  0.8325
+> plot(rpartPlot)
+
+Call:
+roc.default(response = treeResult$actual, predictor = treeResult$calculated,     ci = TRUE, of = "thresholds", thresholds = 0.9) User Note --> AUC
+
+Data: treeResult$calculated in 29914 controls (treeResult$actual 0) < 90926 cases (treeResult$actual 1).
+Area under the curve: 0.7198
+95% CI (2000 stratified bootstrap replicates):
+ thresholds sp.low sp.median sp.high se.low se.median se.high
+        0.9 0.6037    0.6095  0.6152 0.8275    0.8301  0.8325
